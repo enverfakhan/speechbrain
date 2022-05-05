@@ -1,7 +1,7 @@
 # ############################################################################
 # Model: E2E ASR with attention-based ASR
-# Encoder: CRDNN model
-# Decoder: GRU + beamsearch + RNNLM
+# Audio Encoder: Dilated Transformer  model
+# LM Encoder: GRU + beamsearch + RNNLM
 # Tokens: BPE with unigram
 # losses: Transducer
 # Training: Librispeech 100h
@@ -11,7 +11,7 @@
 # Seed needs to be set at top of yaml, before objects with parameters are made
 seed: 1234
 __set_seed: !!python/object/apply:torch.manual_seed [!ref <seed>]
-output_folder: !ref results/D-Transformer-Transducer_BPE_RNNT_LM_100H/<seed>
+output_folder: !ref results/D-Transformer-Transducer_BPE_RNNT_LM_960H/<seed>
 wer_file: !ref <output_folder>/wer.txt
 save_folder: !ref <output_folder>/save
 train_log: !ref <output_folder>/train_log.txt
@@ -30,20 +30,20 @@ data_folder: ../../data/LibriSpeech # !PLACEHOLDER # e.g, /localscratch/LibriSpe
 # then data_folder_rirs should be /localscratch/xxx_corpus
 # otherwise the dataset will automatically be downloaded
 data_folder_rirs: !ref <data_folder>
-train_splits: ["train-clean-100"] #, "train-clean-360", "train-other-500"]
-dev_splits: ["dev-clean"]
+train_splits: ["train-clean-100", "train-clean-360", "train-other-500"]
+dev_splits: ["dev-clean", "dev-other"]
 test_splits: ["test-clean", "test-other"]
 train_csv: !ref <data_folder>/train.csv
 valid_csv: !ref <data_folder>/dev-clean.csv
 test_csv:
    - !ref <data_folder>/test-clean.csv
    - !ref <data_folder>/test-other.csv
-skip_prep: True
+skip_prep: False
 ckpt_interval_minutes: 15 # save checkpoint every N min
 
 # Training parameters
 number_of_epochs: 30
-batch_size: 2
+batch_size: 32
 batch_size_valid: 4
 lr: 1.0
 sorting: ascending
@@ -57,7 +57,7 @@ sorting: ascending
 # Feature parameters
 sample_rate: 16000
 n_fft: 400
-n_mels: 40
+n_mels: 80
 
 opt_class: !name:torch.optim.Adadelta
    lr: !ref <lr>
@@ -99,7 +99,7 @@ look_ahead: 1
 chunk_length: 15
 ####################### Model parameters ###########################
 # Transformer
-d_model: 128
+d_model: 512
 nhead: 4
 num_encoder_layers: 8
 d_ffn: 2048
