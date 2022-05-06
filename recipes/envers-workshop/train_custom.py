@@ -78,7 +78,7 @@ class ASR(sb.Brain):
         # concatenate two subsequent feature to reduce sequence length
         if feats.shape[1] % 2 == 1:
             feats = F.pad(feats, (0, 0, 0, 1), 'constant', 0)
-        feats = feats.contigious().view(feats.shape[0], feats.shape[1] // 2, 2 * feats.shape[2])
+        feats = feats.contiguous().view(feats.shape[0], feats.shape[1] // 2, 2 * feats.shape[2])
         feats = self.modules.normalize(feats, wav_lens)
         # x = self.modules.enc(feats.detach())
         # forward modules
