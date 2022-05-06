@@ -280,6 +280,34 @@ class ASR(sb.Brain):
             )
             with open(self.hparams.wer_file, "w") as w:
                 self.wer_metric.write_stats(w)
+        if has_wandb:
+            wandb_metrics = {}
+            if stage == sb.Stage.TRAIN:
+                wandb_metrics['train_loss'] = stage_loss
+                wandb_metrics['epoch'] = epoch
+                if "RANK" in os.environ:
+                    if os.environ["RANK"] == "":
+                        pass
+                    else:
+                        if int(os.environ["RANK"]) == 0:
+                            # end of train stage is called on all processes, we dont want to duplicate logs se we will
+                            # log the train metrics to the wandb only on the main process
+                            wandb.log(wandb_metrics)
+                            pass
+                        else:
+                            pass
+                else:
+                    pass
+            # end of valid and test stages are called only on main stage, no need to check for rank of the process
+            elif stage == sb.Stage.VALID:
+                wandb_metrics['valid_loss'] = stage_loss
+                wandb_metrics['lr'] = old_lr
+                wandb_metrics['val_wer'] = stage_stats['WER']
+                wandb_metrics['val_cer'] = stage_stats['CER']
+            else:
+                wandb_metrics['test_loss'] = stage_loss
+                wandb_metrics['test_wer'] = stage_stats['WER']
+                wandb_metrics['test_cer'] = stage_stats['CER']
 
 
 def pad_and_creeate_mask(batch, wav_len, look_back, look_ahead, chunk_length):
@@ -410,7 +438,11 @@ def dataio_prepare(hparams):
 
 
 if __name__ == "__main__":
-
+    try:
+        import wandb
+        has_wandb = True
+    except:
+        has_wandb = False
     # CLI:
     hparams_file, run_opts, overrides = sb.parse_arguments(sys.argv[1:])
 
@@ -420,8 +452,12 @@ if __name__ == "__main__":
 
     with open(hparams_file) as fin:
         hparams = load_hyperpyyaml(fin, overrides)
-
-    # Create experiment directory
+    if has_wandb:
+        wandb_config = {}
+        wandb_config.update(hparams)
+        wandb_config.update(run_opts)
+        run_on_main(wandb.init, **{'config': wandb_config})
+        run_on_main(wandb.save, *['./hparams/train.yaml'])
     sb.create_experiment_directory(
         experiment_directory=hparams["output_folder"],
         hyperparams_to_save=hparams_file,
