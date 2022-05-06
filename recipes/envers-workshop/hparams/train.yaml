@@ -46,7 +46,11 @@ number_of_epochs: 30
 batch_size: 32
 batch_size_valid: 4
 lr: 1.0
-sorting: ascending
+sorting: descending # ascending
+key_min_value:
+   duration: 17
+key_max_value:
+   duration: 17
 # MTL for encoder with CTC (uncomment enc_lin layer)
 #number_of_ctc_epochs: 2
 #ctc_weight: 0.33
