@@ -441,11 +441,11 @@ def dataio_prepare(hparams):
 
 
 if __name__ == "__main__":
-    # try:
-    #     import wandb
-    #     has_wandb = True
-    # except:
-    #     has_wandb = False
+    try:
+        import wandb
+        has_wandb = True
+    except:
+        has_wandb = False
     has_wandb = False
     # CLI:
     hparams_file, run_opts, overrides = sb.parse_arguments(sys.argv[1:])
