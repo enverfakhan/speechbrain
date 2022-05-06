@@ -43,7 +43,7 @@ ckpt_interval_minutes: 15 # save checkpoint every N min
 
 # Training parameters
 number_of_epochs: 30
-batch_size: 32
+batch_size: 16
 batch_size_valid: 4
 lr: 1.0
 sorting: descending # ascending
@@ -62,6 +62,7 @@ key_max_value:
 sample_rate: 16000
 n_fft: 400
 n_mels: 80
+lin_in_dim: !ref <n_mels> * 2
 
 opt_class: !name:torch.optim.Adadelta
    lr: !ref <lr>
@@ -124,7 +125,7 @@ unk_index: 0
 ############################## models ################################
 
 linear_in: !new:speechbrain.nnet.linear.Linear
-   input_size: !ref <n_mels>
+   input_size: !ref <lin_in_dim>
    n_neurons: !ref <d_model>
    bias: True
 

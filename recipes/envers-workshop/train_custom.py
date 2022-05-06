@@ -75,6 +75,10 @@ class ASR(sb.Brain):
         # Forward pass
         feats = self.hparams.compute_features(wavs)
         # B, T, E = feats.shape
+        # concatenate two subsequent feature to reduce sequence length
+        if feats.shape[1] % 2 == 1:
+            feats = F.pad(feats, (0, 0, 0, 1), 'constant', 0)
+        feats = feats.contigious().view(feats.shape[0], feats.shape[1] // 2, 2 * feats.shape[2])
         feats = self.modules.normalize(feats, wav_lens)
         # x = self.modules.enc(feats.detach())
         # forward modules
@@ -85,12 +89,11 @@ class ASR(sb.Brain):
                                                                 self.hparams.look_ahead,
                                                                 self.hparams.chunk_length)
         # create
-        x, attn_weights = self.modules.enc(
-                    src,
-                    attn_mask,
-                    key_padding_mask,
-                    self.hparams.chunk_length
-                )
+        x, attn_weights = self.modules.enc(src,
+                                           attn_mask,
+                                           key_padding_mask,
+                                           self.hparams.chunk_length
+                                           )
 
         e_in = self.modules.emb(tokens_with_bos)
         h, _ = self.modules.dec(e_in)
@@ -445,12 +448,17 @@ def dataio_prepare(hparams):
 
 
 if __name__ == "__main__":
+    # TODO:
+    #  1. consider subsampling input features because apparently stupid transformers doesnt fit into a 80GB gpu with
+    #   with batch size 8 and wav length 17
+    #  2. duration: 8.5sec batch_size 16 seems to be working, so filter by 17 sec and subsample by 2 with a
+    #   concatenation operation (we dont need no cnn!)
+    #  3. consider reporting other and clean wer, cer
     try:
         import wandb
         has_wandb = True
     except:
         has_wandb = False
-    has_wandb = False
     # CLI:
     hparams_file, run_opts, overrides = sb.parse_arguments(sys.argv[1:])
 
