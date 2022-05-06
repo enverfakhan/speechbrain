@@ -364,13 +364,14 @@ def dataio_prepare(hparams):
 
     if hparams["sorting"] == "ascending":
         # we sort training data to speed up training and get better results.
-        train_data = train_data.filtered_sorted(sort_key="duration")
+        train_data = train_data.filtered_sorted(sort_key="duration", key_max_value=hparams['key_max_value'])
         # when sorting do not shuffle in dataloader ! otherwise is pointless
         hparams["train_dataloader_opts"]["shuffle"] = False
 
     elif hparams["sorting"] == "descending":
         train_data = train_data.filtered_sorted(
-            sort_key="duration", reverse=True
+            sort_key="duration", reverse=True,
+            key_min_value=hparams['key_min_value']
         )
         # when sorting do not shuffle in dataloader ! otherwise is pointless
         hparams["train_dataloader_opts"]["shuffle"] = False
@@ -440,11 +441,12 @@ def dataio_prepare(hparams):
 
 
 if __name__ == "__main__":
-    try:
-        import wandb
-        has_wandb = True
-    except:
-        has_wandb = False
+    # try:
+    #     import wandb
+    #     has_wandb = True
+    # except:
+    #     has_wandb = False
+    has_wandb = False
     # CLI:
     hparams_file, run_opts, overrides = sb.parse_arguments(sys.argv[1:])
 
