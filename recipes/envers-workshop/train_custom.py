@@ -456,14 +456,14 @@ if __name__ == "__main__":
         wandb_config = {}
         wandb_config.update(hparams)
         wandb_config.update(run_opts)
-        wandb.init(project="sb-dilated-transformer-transducer", entity="envers-workshop")
 
-        run_on_main(wandb.init, **{'config': wandb_config, 
-                                   'project': "sb-dilated-transformer-transducer",
-                                   'entity': "envers-workshop"
-                                   }
+        run_on_main(wandb.init,
+                    kwargs={'config': wandb_config,
+                            'project': "sb-dilated-transformer-transducer",
+                            'entity': "envers-workshop"
+                            }
                     )
-        run_on_main(wandb.save, *['./hparams/train.yaml'])
+        run_on_main(wandb.save, args=('./hparams/train.yaml'))
     sb.create_experiment_directory(
         experiment_directory=hparams["output_folder"],
         hyperparams_to_save=hparams_file,
