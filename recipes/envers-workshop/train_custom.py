@@ -304,10 +304,12 @@ class ASR(sb.Brain):
                 wandb_metrics['lr'] = old_lr
                 wandb_metrics['val_wer'] = stage_stats['WER']
                 wandb_metrics['val_cer'] = stage_stats['CER']
+                wandb.log(wandb_metrics)
             else:
                 wandb_metrics['test_loss'] = stage_loss
                 wandb_metrics['test_wer'] = stage_stats['WER']
                 wandb_metrics['test_cer'] = stage_stats['CER']
+                wandb.log(wandb_metrics)
 
 
 def pad_and_creeate_mask(batch, wav_len, look_back, look_ahead, chunk_length):
