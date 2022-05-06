@@ -463,7 +463,7 @@ if __name__ == "__main__":
                             'entity': "envers-workshop"
                             }
                     )
-        run_on_main(wandb.save, args=('./hparams/train.yaml'))
+        run_on_main(wandb.save, args=('./hparams/train.yaml',))
     sb.create_experiment_directory(
         experiment_directory=hparams["output_folder"],
         hyperparams_to_save=hparams_file,
